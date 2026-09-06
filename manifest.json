@@ -1,0 +1,16 @@
+{
+  "name": "Tonic & Verse",
+  "short_name": "Tonic&Verse",
+  "description": "Circle of fifths, scales & chords, a melody maker, and a lyric lab for songwriting.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#14171c",
+  "theme_color": "#14171c",
+  "orientation": "portrait-primary",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
