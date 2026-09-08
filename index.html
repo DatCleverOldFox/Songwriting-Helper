@@ -13,6 +13,7 @@
 <meta name="apple-mobile-web-app-title" content="Tonic & Verse">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
   :root{
     --bg:#14171c;
@@ -313,6 +314,45 @@
   .suggest-line-option .opt-text{ flex:1 1 auto; color:var(--text); }
   .suggest-line-option .opt-meta{ color:var(--muted); font-size:0.7rem; flex:0 0 auto; }
 
+  /* ---------- song title (standalone) ---------- */
+  .song-title-input{
+    display:block; width:100%; background:transparent; color:var(--text); border:none;
+    border-bottom:1px solid var(--border); border-radius:0; padding:6px 2px 12px 2px;
+    font-family:'Fraunces',serif; font-size:1.7rem; margin-bottom:20px;
+  }
+  .song-title-input:focus{ outline:none; border-bottom-color:var(--accent); }
+
+  /* ---------- collapsible cards (details/summary) ---------- */
+  .details-card{ padding:0; overflow:hidden; }
+  .details-card summary{
+    cursor:pointer; padding:16px 22px; font-family:'Fraunces',serif; font-size:1.05rem;
+    font-weight:600; list-style:none; display:flex; align-items:center; gap:8px;
+  }
+  .details-card summary::-webkit-details-marker{ display:none; }
+  .details-card .chevron{ display:inline-block; transition:transform .15s ease; color:var(--accent); font-size:0.8rem; }
+  .details-card[open] .chevron{ transform:rotate(90deg); }
+  .details-card .summary-hint{ color:var(--muted); font-size:0.75rem; font-weight:400; font-family:'Inter',sans-serif; }
+  .details-card .details-body{ padding:0 22px 20px 22px; }
+
+  /* ---------- song sections ---------- */
+  .song-sections-row{ display:flex; flex-wrap:wrap; gap:10px; }
+  .song-sections-row:empty::after{ content:'No sections yet — add one below to start writing.'; color:var(--muted); font-size:0.82rem; }
+  .section-square{
+    width:132px; min-height:86px; background:var(--panel-alt); border:1px solid var(--border);
+    border-radius:8px; padding:10px; cursor:grab; display:flex; flex-direction:column; gap:6px;
+    transition:border-color .12s ease, background .12s ease, opacity .12s ease;
+  }
+  .section-square:hover{ border-color:var(--teal); }
+  .section-square.active{ border-color:var(--accent); background:var(--accent-soft); }
+  .section-square.dragging{ opacity:0.4; }
+  .section-square.drag-over{ border-color:var(--teal); border-style:dashed; }
+  .section-square .sq-label{ font-family:'Fraunces',serif; font-size:0.92rem; color:var(--text); font-weight:600; }
+  .section-square.active .sq-label{ color:var(--accent); }
+  .section-square .sq-preview{
+    font-family:'JetBrains Mono',monospace; font-size:0.68rem; color:var(--muted);
+    overflow:hidden; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; line-height:1.3;
+  }
+
   /* ---------- melody maker ---------- */
   .mel-transport{ display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-bottom:18px; }
   .mel-transport label{ font-size:0.78rem; color:var(--muted); display:flex; align-items:center; gap:6px; }
@@ -428,31 +468,43 @@
 
   <!-- ============ LYRIC LAB ============ -->
   <section class="panel" id="panel-lyrics">
-    <div class="card" id="apiKeyCard">
-      <h2 class="section-title">Rewrite assistant</h2>
-      <p class="section-note">The ✨ button on each line calls Claude directly from your browser to suggest rewrites. Paste your own Anthropic API key here to use it without Claude.ai — get one at <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener" style="color:var(--accent);">console.anthropic.com</a>. It's saved only in this browser (localStorage) and sent only to Anthropic's API — never anywhere else. Don't share this file once your key is in it.</p>
-      <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
-        <input type="password" id="apiKeyInput" placeholder="sk-ant-..." autocomplete="off"
-          style="flex:1 1 240px; background:var(--panel-alt); color:var(--text); border:1px solid var(--border); border-radius:6px; padding:9px 10px; font-family:'JetBrains Mono',monospace; font-size:0.85rem;">
-        <button class="pill" id="apiKeySaveBtn">save key</button>
-        <button class="pill" id="apiKeyClearBtn">clear</button>
+    <input type="text" id="songTitleInput" placeholder="Song title" value="Untitled Song" class="song-title-input">
+
+    <details class="card details-card" id="apiKeyCard">
+      <summary><span class="chevron">▸</span> ✨ Rewrite assistant <span class="summary-hint">(click to expand)</span></summary>
+      <div class="details-body">
+        <p class="section-note">The ✨ button on each line calls Claude directly from your browser to suggest rewrites. Paste your own Anthropic API key here to use it without Claude.ai — get one at <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener" style="color:var(--accent);">console.anthropic.com</a>. It's saved only in this browser (localStorage) and sent only to Anthropic's API — never anywhere else. Don't share this file once your key is in it.</p>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+          <input type="password" id="apiKeyInput" placeholder="sk-ant-..." autocomplete="off"
+            style="flex:1 1 240px; background:var(--panel-alt); color:var(--text); border:1px solid var(--border); border-radius:6px; padding:9px 10px; font-family:'JetBrains Mono',monospace; font-size:0.85rem;">
+          <button class="pill" id="apiKeySaveBtn">save key</button>
+          <button class="pill" id="apiKeyClearBtn">clear</button>
+        </div>
+        <p class="section-note" id="apiKeyStatus" style="margin-top:8px; margin-bottom:0;"></p>
       </div>
-      <p class="section-note" id="apiKeyStatus" style="margin-top:8px; margin-bottom:0;"></p>
-    </div>
+    </details>
+
     <div class="card" id="referenceCard">
       <h2 class="section-title">Match a reference</h2>
       <p class="section-note">Paste a verse you want to echo the feel of — a song you like, one of your own drafts, anything. It's only used locally to measure syllables-per-line and rhyme shape (like AABB or ABAB); nothing is looked up or sent anywhere. Your own lyrics below will then get flagged line-by-line against this pattern.</p>
       <textarea id="referenceInput" class="lyric-textarea" placeholder="Paste a reference verse here..."></textarea>
       <div id="referenceReadout" style="margin-top:12px;"></div>
     </div>
+
     <div class="grid">
       <div class="card">
-        <h2 class="section-title">Write</h2>
+        <h2 class="section-title">Writing: <span id="currentSectionLabel" style="color:var(--accent);">Verse 1</span></h2>
+        <div id="songSectionsRow" class="song-sections-row"></div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin:12px 0 16px 0;">
+          <label style="font-size:0.78rem; color:var(--muted);">This section is a:</label>
+          <select id="sectionTypeSelect" class="scale-select" style="width:auto; margin-bottom:0;"></select>
+          <input type="text" id="customSectionNameInput" placeholder="Section name..." style="display:none; background:var(--panel-alt); color:var(--text); border:1px solid var(--border); border-radius:6px; padding:9px 10px; font-family:'Inter',sans-serif; font-size:0.85rem;">
+          <button class="pill" id="addSectionBtn">+ new section</button>
+          <button class="pill" id="deleteSectionBtn" style="border-color:var(--danger); color:var(--danger);">delete this section</button>
+          <button class="web-link" id="exportPdfBtn" type="button" style="margin-left:auto;">⬇ export PDF</button>
+        </div>
         <p class="section-note">Type or paste lyrics. Each line gets a syllable count and a rough rhyme-scheme letter, and underlined words show internal rhyme (rhymes within the same line). Click any word for rhymes, near-rhymes, and synonyms from Datamuse. Click ✨ on a line to get AI-rewritten alternatives that better match your reference's syllables and rhyme.</p>
-        <textarea id="lyricsInput" class="lyric-textarea" placeholder="Start writing a verse here...">Woke up to a grey and quiet street
-Coffee going cold before I eat
-Something in the static wants to speak
-Louder than the silence of the week</textarea>
+        <textarea id="lyricsInput" class="lyric-textarea" placeholder="Start writing a verse here..."></textarea>
         <div id="analysisOutput"></div>
       </div>
       <div class="card">
@@ -1174,7 +1226,267 @@ function applySuggestion(newWord){
   renderAnalysis();
 }
 
-lyricsInput.addEventListener('input', renderAnalysis);
+/* =========================================================
+   SONG SECTIONS (verse/chorus/bridge etc, each kept separate)
+   ========================================================= */
+const SECTION_PRESETS = ['Intro','Verse 1','Verse 2','Verse 3','Verse 4','Pre-Chorus','Chorus','Post-Chorus','Bridge','Refrain','Hook','Outro','Custom…'];
+const SONG_STORAGE_KEY = 'tonicVerseSongDraft';
+
+let songSections = [];      // {id, label, text}
+let currentSectionId = null;
+
+const sectionTypeSelect = document.getElementById('sectionTypeSelect');
+SECTION_PRESETS.forEach(p=>{
+  const opt = document.createElement('option');
+  opt.value = p; opt.textContent = p;
+  sectionTypeSelect.appendChild(opt);
+});
+const customSectionNameInput = document.getElementById('customSectionNameInput');
+
+// The dropdown always reflects (and edits) the CURRENTLY ACTIVE section's label.
+// Changing it renames that section immediately - no prompt, no confirmation step.
+function syncSectionTypeUI(label){
+  if(SECTION_PRESETS.includes(label)){
+    sectionTypeSelect.value = label;
+    customSectionNameInput.style.display = 'none';
+  } else {
+    sectionTypeSelect.value = 'Custom…';
+    customSectionNameInput.style.display = 'block';
+    customSectionNameInput.value = label;
+  }
+}
+
+function renameActiveSection(newLabel){
+  const sec = songSections.find(s => s.id === currentSectionId);
+  if(!sec || !newLabel) return;
+  sec.label = newLabel;
+  document.getElementById('currentSectionLabel').textContent = newLabel;
+  renderSongStructure();
+  saveSongDraftDebounced();
+}
+
+sectionTypeSelect.addEventListener('change', ()=>{
+  if(sectionTypeSelect.value === 'Custom…'){
+    customSectionNameInput.style.display = 'block';
+    customSectionNameInput.value = '';
+    customSectionNameInput.focus();
+    return; // wait for a typed name before renaming
+  }
+  customSectionNameInput.style.display = 'none';
+  renameActiveSection(sectionTypeSelect.value);
+});
+customSectionNameInput.addEventListener('input', ()=>{
+  const trimmed = customSectionNameInput.value.trim();
+  if(trimmed) renameActiveSection(trimmed);
+});
+
+function uid(){ return 's' + Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+
+function saveSongDraft(){
+  try{
+    localStorage.setItem(SONG_STORAGE_KEY, JSON.stringify({
+      title: document.getElementById('songTitleInput').value,
+      sections: songSections,
+      currentSectionId
+    }));
+  }catch(e){ /* storage unavailable, skip silently */ }
+}
+let saveTimer = null;
+function saveSongDraftDebounced(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveSongDraft, 400);
+}
+
+function loadSongDraft(){
+  try{
+    const raw = localStorage.getItem(SONG_STORAGE_KEY);
+    if(!raw) return false;
+    const parsed = JSON.parse(raw);
+    if(!parsed.sections || !parsed.sections.length) return false;
+    songSections = parsed.sections;
+    currentSectionId = parsed.currentSectionId || songSections[0].id;
+    document.getElementById('songTitleInput').value = parsed.title || 'Untitled Song';
+    return true;
+  }catch(e){ return false; }
+}
+
+let dragSectionId = null;
+
+function renderSongStructure(){
+  const row = document.getElementById('songSectionsRow');
+  row.innerHTML = songSections.map(sec=>{
+    const preview = sec.text.trim() ? sec.text.trim().split('\n').slice(0,3).join('\n') : '(empty)';
+    const active = sec.id === currentSectionId ? ' active' : '';
+    return `<div class="section-square${active}" data-id="${sec.id}" draggable="true">
+      <div class="sq-label">${sec.label}</div>
+      <div class="sq-preview">${preview.replace(/</g,'&lt;')}</div>
+    </div>`;
+  }).join('');
+
+  row.querySelectorAll('.section-square').forEach(sq=>{
+    sq.addEventListener('click', ()=> selectSection(sq.dataset.id));
+
+    sq.addEventListener('dragstart', ()=>{
+      dragSectionId = sq.dataset.id;
+      sq.classList.add('dragging');
+    });
+    sq.addEventListener('dragend', ()=>{
+      sq.classList.remove('dragging');
+      row.querySelectorAll('.section-square').forEach(el => el.classList.remove('drag-over'));
+      dragSectionId = null;
+    });
+    sq.addEventListener('dragover', (e)=>{
+      e.preventDefault();
+      if(sq.dataset.id !== dragSectionId) sq.classList.add('drag-over');
+    });
+    sq.addEventListener('dragleave', ()=>{
+      sq.classList.remove('drag-over');
+    });
+    sq.addEventListener('drop', (e)=>{
+      e.preventDefault();
+      sq.classList.remove('drag-over');
+      const targetId = sq.dataset.id;
+      if(!dragSectionId || dragSectionId === targetId) return;
+      const fromIdx = songSections.findIndex(s => s.id === dragSectionId);
+      const toIdx = songSections.findIndex(s => s.id === targetId);
+      if(fromIdx === -1 || toIdx === -1) return;
+      const [moved] = songSections.splice(fromIdx, 1);
+      songSections.splice(toIdx, 0, moved);
+      renderSongStructure();
+      saveSongDraftDebounced();
+    });
+  });
+}
+
+function selectSection(id){
+  const sec = songSections.find(s => s.id === id);
+  if(!sec) return;
+  currentSectionId = id;
+  lyricsInput.value = sec.text;
+  document.getElementById('currentSectionLabel').textContent = sec.label;
+  syncSectionTypeUI(sec.label);
+  renderSongStructure();
+  renderAnalysis();
+  saveSongDraftDebounced();
+}
+
+function createSection(){
+  // Starts generic on purpose - the type dropdown (bound to whichever section
+  // is active) is how you set/change its label, right after it's created.
+  const sec = { id: uid(), label: 'New Section', text: '' };
+  songSections.push(sec);
+  selectSection(sec.id);
+}
+
+function deleteCurrentSection(){
+  if(!currentSectionId || !songSections.length) return;
+  const idx = songSections.findIndex(s => s.id === currentSectionId);
+  if(idx === -1) return;
+  if(!confirm('Delete "' + songSections[idx].label + '"? This can\'t be undone.')) return;
+  songSections.splice(idx, 1);
+  if(songSections.length){
+    selectSection(songSections[Math.max(0, idx-1)].id);
+  } else {
+    currentSectionId = null;
+    lyricsInput.value = '';
+    document.getElementById('currentSectionLabel').textContent = 'no section — add one above';
+    renderSongStructure();
+    renderAnalysis();
+    saveSongDraftDebounced();
+  }
+}
+
+document.getElementById('addSectionBtn').addEventListener('click', createSection);
+document.getElementById('deleteSectionBtn').addEventListener('click', deleteCurrentSection);
+document.getElementById('songTitleInput').addEventListener('input', saveSongDraftDebounced);
+
+lyricsInput.addEventListener('input', ()=>{
+  renderAnalysis();
+  const sec = songSections.find(s => s.id === currentSectionId);
+  if(sec){
+    sec.text = lyricsInput.value;
+    renderSongStructure(); // refresh the preview snippet + keep active highlight
+    saveSongDraftDebounced();
+  }
+});
+
+/* ----- PDF export ----- */
+// jsPDF's built-in fonts only reliably support a WinAnsi-ish character set;
+// smart quotes/dashes from pasted text (Notes, Word, etc.) can render as blank
+// boxes or, in some versions, throw. Swap them for plain ASCII first.
+function pdfSafeText(str){
+  return String(str)
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(/[\u201C\u201D]/g, '"')
+    .replace(/[\u2013\u2014]/g, '-')
+    .replace(/\u2026/g, '...');
+}
+
+function exportSongPdf(){
+  try{
+    if(!window.jspdf || !window.jspdf.jsPDF){
+      alert('The PDF library hasn\'t finished loading yet (it needs an internet connection the first time). Wait a second and try again.');
+      return;
+    }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit:'pt', format:'letter' });
+    const marginX = 64, maxWidth = 484, pageBottom = 730;
+    let y = 72;
+    const title = pdfSafeText((document.getElementById('songTitleInput').value || 'Untitled Song').trim());
+
+    doc.setFont('times','bold');
+    doc.setFontSize(20);
+    doc.text(title, marginX, y);
+    y += 34;
+
+    const sectionsToExport = songSections.filter(s => s.text.trim().length > 0);
+    if(!sectionsToExport.length){
+      doc.setFont('times','italic');
+      doc.setFontSize(12);
+      doc.text('(no lyrics written yet)', marginX, y);
+    }
+
+    sectionsToExport.forEach(sec=>{
+      if(y > pageBottom - 30){ doc.addPage(); y = 72; }
+      doc.setFont('times','bold');
+      doc.setFontSize(12);
+      doc.text(pdfSafeText(sec.label.toUpperCase()), marginX, y);
+      y += 18;
+      doc.setFont('times','normal');
+      doc.setFontSize(11);
+      sec.text.split('\n').forEach(line=>{
+        const wrapped = doc.splitTextToSize(pdfSafeText(line) || ' ', maxWidth);
+        wrapped.forEach(wl=>{
+          if(y > pageBottom){ doc.addPage(); y = 72; }
+          doc.text(wl, marginX, y);
+          y += 15;
+        });
+      });
+      y += 16;
+    });
+
+    const filename = (title || 'song').toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'') || 'song';
+    doc.save(filename + '.pdf');
+  }catch(err){
+    console.error('PDF export failed:', err);
+    alert('PDF export hit an error: ' + (err && err.message ? err.message : err) + '\n\nOpen the browser console for more detail.');
+  }
+}
+document.getElementById('exportPdfBtn').addEventListener('click', exportSongPdf);
+
+/* ----- init: restore a saved draft, or start with a fresh Verse 1 ----- */
+if(!loadSongDraft()){
+  songSections = [{
+    id: uid(), label: 'Verse 1',
+    text: 'Woke up to a grey and quiet street\nCoffee going cold before I eat\nSomething in the static wants to speak\nLouder than the silence of the week'
+  }];
+  currentSectionId = songSections[0].id;
+}
+lyricsInput.value = (songSections.find(s=>s.id===currentSectionId) || {text:''}).text;
+document.getElementById('currentSectionLabel').textContent =
+  (songSections.find(s=>s.id===currentSectionId) || {label:'no section'}).label;
+syncSectionTypeUI((songSections.find(s=>s.id===currentSectionId) || {label:'Verse 1'}).label);
+renderSongStructure();
 renderAnalysis();
 
 /* =========================================================
