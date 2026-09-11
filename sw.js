@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tonic-and-verse-v1';
+const CACHE_NAME = 'tonic-and-verse-v2';
 const APP_SHELL = [
   './',
   './index.html',
@@ -24,25 +24,30 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  const url = event.request.url;
+  const requestUrl = new URL(event.request.url);
 
-  // Never cache or intercept live API calls - these must always hit the network fresh.
-  if (url.includes('api.anthropic.com') || url.includes('api.datamuse.com')) {
+  // Only manage same-origin GET requests for the app's own files. Any
+  // cross-origin request - Datamuse, Anthropic, OpenAI, OpenRouter, Groq, or
+  // any custom AI provider base URL the user configures - is left completely
+  // alone here, so nothing in this file can ever interfere with an API call.
+  if (requestUrl.origin !== self.location.origin || event.request.method !== 'GET') {
     return;
   }
 
+  // Network-first for the app's own files: always try to fetch the latest
+  // version when online, and only fall back to the cached copy if the
+  // network request actually fails (e.g. genuinely offline). This means
+  // updates to index.html show up on next load automatically, instead of
+  // requiring a cache-name bump every time the app changes.
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      const networkFetch = fetch(event.request)
-        .then((response) => {
-          if (event.request.method === 'GET' && response && response.status === 200 && response.type === 'basic') {
-            const clone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
-          }
-          return response;
-        })
-        .catch(() => cached);
-      return cached || networkFetch;
-    })
+    fetch(event.request)
+      .then((response) => {
+        if (response && response.status === 200 && response.type === 'basic') {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+        }
+        return response;
+      })
+      .catch(() => caches.match(event.request))
   );
 });
