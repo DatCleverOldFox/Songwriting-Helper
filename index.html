@@ -332,22 +332,6 @@
   .ref-compare.warn{ background:var(--accent-soft); color:var(--accent); }
   .ref-compare.bad, .ref-rhyme.bad{ background:rgba(201,102,106,0.18); color:var(--danger); }
 
-  .mini-suggest{
-    flex:0 0 auto; font-size:0.78rem; background:transparent; color:var(--accent);
-    border:1px solid var(--accent); border-radius:5px; padding:2px 8px; cursor:pointer;
-    font-family:'Inter',sans-serif;
-  }
-  .mini-suggest:hover{ background:var(--accent-soft); }
-  .line-suggestions{ flex-basis:100%; margin-top:2px; }
-  .line-suggestions:empty{ display:none; }
-  .suggest-line-option{
-    display:flex; align-items:center; gap:10px; background:var(--panel-alt);
-    border:1px solid var(--border); border-radius:6px; padding:8px 10px; margin-bottom:6px;
-    font-family:'JetBrains Mono',monospace; font-size:0.82rem;
-  }
-  .suggest-line-option .opt-text{ flex:1 1 auto; color:var(--text); }
-  .suggest-line-option .opt-meta{ color:var(--muted); font-size:0.7rem; flex:0 0 auto; }
-
   /* ---------- song title (standalone) ---------- */
   .song-title-input{
     display:block; width:100%; background:transparent; color:var(--text); border:none;
@@ -355,18 +339,6 @@
     font-family:'Fraunces',serif; font-size:1.7rem; margin-bottom:20px;
   }
   .song-title-input:focus{ outline:none; border-bottom-color:var(--accent); }
-
-  /* ---------- collapsible cards (details/summary) ---------- */
-  .details-card{ padding:0; overflow:hidden; }
-  .details-card summary{
-    cursor:pointer; padding:16px 22px; font-family:'Fraunces',serif; font-size:1.05rem;
-    font-weight:600; list-style:none; display:flex; align-items:center; gap:8px;
-  }
-  .details-card summary::-webkit-details-marker{ display:none; }
-  .details-card .chevron{ display:inline-block; transition:transform .15s ease; color:var(--accent); font-size:0.8rem; }
-  .details-card[open] .chevron{ transform:rotate(90deg); }
-  .details-card .summary-hint{ color:var(--muted); font-size:0.75rem; font-weight:400; font-family:'Inter',sans-serif; }
-  .details-card .details-body{ padding:0 22px 20px 22px; }
 
   /* ---------- song sections ---------- */
   .song-sections-row{ display:flex; flex-wrap:wrap; gap:10px; }
@@ -504,44 +476,6 @@
   <section class="panel" id="panel-lyrics">
     <input type="text" id="songTitleInput" placeholder="Song title" value="Untitled Song" class="song-title-input">
 
-    <details class="card details-card" id="aiProviderCard">
-      <summary><span class="chevron">▸</span> ✨ Rewrite assistant <span class="summary-hint">(click to expand — AI provider settings)</span></summary>
-      <div class="details-body">
-        <p class="section-note">The ✨ button on each line asks an AI model to suggest rewrites, called directly from your browser — no server in between. Works with Anthropic or any OpenAI-compatible API (OpenRouter, Groq, OpenAI, etc.). Pick a quick preset below or fill in your own endpoint. Your key is saved only in this browser's local storage and is sent only to the API base URL you specify — never anywhere else.</p>
-        <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:10px;">
-          <label style="font-size:0.78rem; color:var(--muted);">Quick preset:</label>
-          <select id="providerPresetSelect" class="scale-select" style="width:auto; margin-bottom:0;">
-            <option value="custom">Custom / other</option>
-            <option value="anthropic">Anthropic</option>
-            <option value="openrouter">OpenRouter</option>
-            <option value="groq">Groq</option>
-            <option value="openai">OpenAI</option>
-          </select>
-        </div>
-        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px;">
-          <input type="text" id="providerNameInput" placeholder="Provider name (e.g. OpenRouter)"
-            style="flex:1 1 200px; background:var(--panel-alt); color:var(--text); border:1px solid var(--border); border-radius:6px; padding:9px 10px; font-family:'Inter',sans-serif; font-size:0.85rem;">
-          <select id="providerFormatSelect" class="scale-select" style="flex:1 1 200px; width:auto; margin-bottom:0;">
-            <option value="openai">OpenAI-compatible (Chat Completions)</option>
-            <option value="anthropic">Anthropic (Messages API)</option>
-          </select>
-        </div>
-        <input type="text" id="providerBaseUrlInput" placeholder="API base URL, e.g. https://openrouter.ai/api/v1"
-          style="width:100%; background:var(--panel-alt); color:var(--text); border:1px solid var(--border); border-radius:6px; padding:9px 10px; font-family:'JetBrains Mono',monospace; font-size:0.85rem; margin-bottom:8px;">
-        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px;">
-          <input type="text" id="providerModelInput" placeholder="Model name, e.g. gpt-4o-mini"
-            style="flex:1 1 200px; background:var(--panel-alt); color:var(--text); border:1px solid var(--border); border-radius:6px; padding:9px 10px; font-family:'JetBrains Mono',monospace; font-size:0.85rem;">
-          <input type="password" id="providerApiKeyInput" placeholder="API key" autocomplete="off"
-            style="flex:1 1 200px; background:var(--panel-alt); color:var(--text); border:1px solid var(--border); border-radius:6px; padding:9px 10px; font-family:'JetBrains Mono',monospace; font-size:0.85rem;">
-        </div>
-        <div style="display:flex; gap:8px; flex-wrap:wrap;">
-          <button class="pill" id="providerSaveBtn">save settings</button>
-          <button class="pill" id="providerClearKeyBtn" style="border-color:var(--danger); color:var(--danger);">clear saved key</button>
-        </div>
-        <p class="section-note" id="providerStatus" style="margin-top:8px; margin-bottom:0;"></p>
-      </div>
-    </details>
-
     <div class="card" id="referenceCard">
       <h2 class="section-title">Match a reference</h2>
       <p class="section-note">Paste a verse you want to echo the feel of — a song you like, one of your own drafts, anything. It's only used locally to measure syllables-per-line and rhyme shape (like AABB or ABAB); nothing is looked up or sent anywhere. Your own lyrics below will then get flagged line-by-line against this pattern.</p>
@@ -561,7 +495,7 @@
           <button class="pill" id="deleteSectionBtn" style="border-color:var(--danger); color:var(--danger);">delete this section</button>
           <button class="web-link" id="exportPdfBtn" type="button" style="margin-left:auto;">⬇ export PDF</button>
         </div>
-        <p class="section-note">Type or paste lyrics. Each line gets a syllable count and a rough rhyme-scheme letter, and underlined words show internal rhyme (rhymes within the same line). Click any word for rhymes, near-rhymes, and synonyms from Datamuse. Click ✨ on a line to get AI-rewritten alternatives that better match your reference's syllables and rhyme.</p>
+        <p class="section-note">Type or paste lyrics. Each line gets a syllable count and a rough rhyme-scheme letter, and underlined words show internal rhyme (rhymes within the same line). Click any word for rhymes, near-rhymes, and synonyms from Datamuse.</p>
         <textarea id="lyricsInput" class="lyric-textarea" placeholder="Start writing a verse here..."></textarea>
         <div id="analysisOutput"></div>
       </div>
@@ -1009,7 +943,6 @@ function analyzeLines(text){
 
 let referenceAnalysis = null;   // compact array (blank lines removed), aligned by order
 let referenceRawLines = null;   // matching raw trimmed line text, same alignment
-let lastLineRecords = [];       // per-line data from the most recent renderAnalysis(), used by the rewrite tool
 const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
 function renderAnalysis(){
@@ -1018,7 +951,6 @@ function renderAnalysis(){
   let nextClass = 0;
   let nonBlankIdx = 0;
   let html = '';
-  lastLineRecords = [];
   lines.forEach((line, li)=>{
     const trimmed = line.trim();
     if(!trimmed){ html += '<div class="lyric-line empty"></div>'; return; }
@@ -1041,11 +973,8 @@ function renderAnalysis(){
     const hasInternal = internalClusters.some(c => c !== null);
 
     let compareHtml = '';
-    let refTargetSyll = null, refTargetLine = null;
     if(referenceAnalysis && referenceAnalysis[nonBlankIdx]){
       const ref = referenceAnalysis[nonBlankIdx];
-      refTargetSyll = ref.syll;
-      refTargetLine = referenceRawLines ? referenceRawLines[nonBlankIdx] : null;
       const diff = syllTotal - ref.syll;
       const diffLabel = diff === 0 ? 'match' : (diff > 0 ? '+'+diff : String(diff));
       const diffClass = diff === 0 ? 'ok' : (Math.abs(diff) <= 1 ? 'warn' : 'bad');
@@ -1055,14 +984,6 @@ function renderAnalysis(){
         compareHtml += `<span class="ref-rhyme warn" title="the reference line has an internal rhyme this line doesn't">no internal rhyme</span>`;
       }
     }
-
-    // find an earlier line in this draft with the same end-rhyme, to use as a rhyme target
-    const mate = lastLineRecords.find(r => r.classId === classId);
-
-    lastLineRecords.push({
-      lineIndex: li, nonBlankIdx, text: trimmed, syll: syllTotal, classId,
-      rhymeMateText: mate ? mate.text : null, refTargetSyll, refTargetLine
-    });
     nonBlankIdx++;
 
     html += `<div class="lyric-line" data-lineindex="${li}">
@@ -1070,16 +991,11 @@ function renderAnalysis(){
       <span class="line-words">${wordsHtml}</span>
       ${compareHtml}
       <span class="syll-count">${syllTotal} syl</span>
-      <button class="mini-suggest" data-line="${li}" title="suggest a rewrite">✨</button>
-      <div class="line-suggestions" id="lineSugg-${li}"></div>
     </div>`;
   });
   analysisOutput.innerHTML = html;
   analysisOutput.querySelectorAll('.word').forEach(el=>{
     el.addEventListener('click', ()=>selectWord(el));
-  });
-  analysisOutput.querySelectorAll('.mini-suggest').forEach(btn=>{
-    btn.addEventListener('click', ()=>requestLineRewrite(parseInt(btn.dataset.line)));
   });
 }
 
@@ -1106,224 +1022,6 @@ referenceInput.addEventListener('input', ()=>{
   </div>`;
   renderAnalysis();
 });
-
-/* ----- AI provider config (stored locally, used for direct browser calls) -----
-   Supports Anthropic's Messages API and any OpenAI-compatible Chat Completions
-   API (OpenRouter, Groq, OpenAI, etc.) via a single stored config object. */
-const AI_PROVIDER_STORAGE = 'tonicVerseAIProvider';
-const LEGACY_ANTHROPIC_KEY_STORAGE = 'tonicVerseAnthropicKey'; // read-only migration from an earlier version
-
-const PROVIDER_PRESETS = {
-  anthropic:  { format:'anthropic', name:'Anthropic',  baseUrl:'https://api.anthropic.com',      modelPlaceholder:'claude-sonnet-5' },
-  openrouter: { format:'openai',    name:'OpenRouter',  baseUrl:'https://openrouter.ai/api/v1',   modelPlaceholder:'anthropic/claude-3.5-sonnet' },
-  groq:       { format:'openai',    name:'Groq',        baseUrl:'https://api.groq.com/openai/v1', modelPlaceholder:'llama-3.3-70b-versatile' },
-  openai:     { format:'openai',    name:'OpenAI',      baseUrl:'https://api.openai.com/v1',      modelPlaceholder:'gpt-4o-mini' },
-  custom:     { format:'openai',    name:'',            baseUrl:'',                               modelPlaceholder:'model-name' }
-};
-
-function getProviderConfig(){
-  try{
-    const raw = localStorage.getItem(AI_PROVIDER_STORAGE);
-    if(raw) return JSON.parse(raw);
-  }catch(e){ /* fall through to migration/defaults */ }
-  // One-time migration path for anyone who saved a key with the old Anthropic-only version.
-  try{
-    const legacyKey = localStorage.getItem(LEGACY_ANTHROPIC_KEY_STORAGE);
-    if(legacyKey){
-      return { format:'anthropic', name:'Anthropic', baseUrl:'https://api.anthropic.com', model:'claude-sonnet-5', apiKey: legacyKey };
-    }
-  }catch(e){ /* ignore */ }
-  return { format:'openai', name:'', baseUrl:'', model:'', apiKey:'' };
-}
-function saveProviderConfig(cfg){
-  try{ localStorage.setItem(AI_PROVIDER_STORAGE, JSON.stringify(cfg)); }catch(e){ /* storage unavailable, skip silently */ }
-}
-
-const providerPresetSelect = document.getElementById('providerPresetSelect');
-const providerNameInput = document.getElementById('providerNameInput');
-const providerFormatSelect = document.getElementById('providerFormatSelect');
-const providerBaseUrlInput = document.getElementById('providerBaseUrlInput');
-const providerModelInput = document.getElementById('providerModelInput');
-const providerApiKeyInput = document.getElementById('providerApiKeyInput');
-const providerStatus = document.getElementById('providerStatus');
-
-function refreshProviderUI(){
-  const cfg = getProviderConfig();
-  providerNameInput.value = cfg.name || '';
-  providerFormatSelect.value = cfg.format || 'openai';
-  providerBaseUrlInput.value = cfg.baseUrl || '';
-  providerModelInput.value = cfg.model || '';
-  providerApiKeyInput.value = cfg.apiKey || '';
-  providerStatus.textContent = cfg.apiKey
-    ? `Key saved for ${cfg.name || 'this provider'} ✓ — the ✨ rewrite button is ready to use.`
-    : 'No key saved yet — the ✨ rewrite button will prompt you to add one.';
-}
-
-providerPresetSelect.addEventListener('change', ()=>{
-  const preset = PROVIDER_PRESETS[providerPresetSelect.value];
-  if(!preset) return;
-  providerFormatSelect.value = preset.format;
-  providerNameInput.value = preset.name;
-  providerBaseUrlInput.value = preset.baseUrl;
-  providerModelInput.placeholder = 'Model name, e.g. ' + preset.modelPlaceholder;
-});
-
-document.getElementById('providerSaveBtn').addEventListener('click', ()=>{
-  saveProviderConfig({
-    format: providerFormatSelect.value,
-    name: providerNameInput.value.trim(),
-    baseUrl: providerBaseUrlInput.value.trim().replace(/\/+$/,''),
-    model: providerModelInput.value.trim(),
-    apiKey: providerApiKeyInput.value.trim()
-  });
-  refreshProviderUI();
-});
-document.getElementById('providerClearKeyBtn').addEventListener('click', ()=>{
-  const cfg = getProviderConfig();
-  cfg.apiKey = '';
-  saveProviderConfig(cfg);
-  refreshProviderUI();
-});
-refreshProviderUI();
-
-// Single place that knows how to talk to either API shape. Returns the raw
-// text the model produced. Throws a descriptive error on any failure.
-async function callAIProvider(promptText){
-  const cfg = getProviderConfig();
-  if(!cfg.apiKey) throw new Error('No API key saved — add one in the Rewrite assistant settings at the top of this tab.');
-  if(!cfg.baseUrl) throw new Error('No API base URL set — add one in the Rewrite assistant settings.');
-  if(!cfg.model) throw new Error('No model name set — add one in the Rewrite assistant settings.');
-
-  if(cfg.format === 'anthropic'){
-    const response = await fetch(cfg.baseUrl + '/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': cfg.apiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({ model: cfg.model, max_tokens: 1000, messages: [{ role:'user', content: promptText }] })
-    });
-    const data = await response.json();
-    if(!response.ok){
-      throw new Error((data.error && data.error.message) || ('Request failed (' + response.status + ')'));
-    }
-    return (data.content || []).map(b => b.text || '').join('');
-  }
-
-  // OpenAI-compatible Chat Completions format (OpenRouter, Groq, OpenAI, etc.)
-  // OpenAI's newer models require `max_completion_tokens` instead of the older
-  // `max_tokens`; most other OpenAI-compatible hosts (OpenRouter, Groq) still
-  // expect `max_tokens`. Guess from the host, then self-heal by retrying once
-  // with the other name if the API itself says we guessed wrong.
-  const preferCompletionTokens = isOpenAIHost(cfg.baseUrl);
-  try{
-    return await callOpenAICompatible(cfg, promptText, preferCompletionTokens);
-  }catch(err){
-    if(err.isTokenParamError){
-      return await callOpenAICompatible(cfg, promptText, !preferCompletionTokens);
-    }
-    throw err;
-  }
-}
-
-function isOpenAIHost(baseUrl){
-  try{ return new URL(baseUrl).hostname.endsWith('openai.com'); }
-  catch(e){ return /openai\.com/i.test(baseUrl); }
-}
-
-async function callOpenAICompatible(cfg, promptText, useCompletionTokensParam){
-  const body = { model: cfg.model, messages: [{ role:'user', content: promptText }] };
-  body[useCompletionTokensParam ? 'max_completion_tokens' : 'max_tokens'] = 1000;
-  const response = await fetch(cfg.baseUrl + '/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + cfg.apiKey
-    },
-    body: JSON.stringify(body)
-  });
-  const data = await response.json();
-  if(!response.ok){
-    const msg = (data.error && data.error.message) || ('Request failed (' + response.status + ')');
-    const err = new Error(msg);
-    err.isTokenParamError = /max_tokens|max_completion_tokens/i.test(msg) && /not supported|unsupported/i.test(msg);
-    throw err;
-  }
-  const choice = data.choices && data.choices[0];
-  return (choice && choice.message && choice.message.content) || '';
-}
-
-/* ----- AI-assisted line rewrites (internal/external rhyme logic) ----- */
-async function requestLineRewrite(li){
-  const rec = lastLineRecords.find(r => r.lineIndex === li);
-  if(!rec) return;
-  const container = document.getElementById('lineSugg-'+li);
-
-  const cfg = getProviderConfig();
-  if(!cfg.apiKey || !cfg.baseUrl || !cfg.model){
-    container.innerHTML = '<p class="empty-hint" style="margin:6px 0;">Set up an AI provider (key, base URL, model) at the top of this tab to use the rewrite assistant.</p>';
-    return;
-  }
-  container.innerHTML = '<p class="empty-hint" style="margin:6px 0;">✨ thinking…</p>';
-
-  const targetSyll = rec.refTargetSyll || rec.syll;
-  let rhymeGuide;
-  if(rec.refTargetLine){
-    rhymeGuide = `Aim to end the line with a word that rhymes with the end of this reference line, to match its sound: "${rec.refTargetLine}"`;
-  } else if(rec.rhymeMateText){
-    rhymeGuide = `This line should end with a word that rhymes with this earlier line: "${rec.rhymeMateText}"`;
-  } else {
-    rhymeGuide = `Keep a strong, natural end rhyme — later lines may be written to match whatever sound you choose.`;
-  }
-
-  const prompt = `You are a songwriting collaborator helping rewrite one line of a verse.
-Original line: "${rec.text}"
-Current syllable count: ${rec.syll}. Target syllable count: ${targetSyll} (get as close as possible, ideally exact).
-${rhymeGuide}
-Where it feels natural, weave in one internal near-rhyme partway through the line (a rhyme between two words inside the line itself, not just at the end) — the way lyricists like Twenty One Pilots often do. Never force an internal rhyme at the cost of the line's meaning or naturalness.
-Preserve the original meaning and imagery. Sound like natural, contemporary spoken English — avoid clichés.
-Give exactly 3 distinct alternatives.
-Respond with ONLY raw JSON, no markdown fences, no other text, in exactly this shape:
-{"suggestions": ["line one", "line two", "line three"]}`;
-
-  try{
-    const textOut = await callAIProvider(prompt);
-    const clean = textOut.replace(/```json|```/g, '').trim();
-    const parsed = JSON.parse(clean);
-    renderLineSuggestions(li, parsed.suggestions || []);
-  }catch(e){
-    container.innerHTML = `<p class="empty-hint" style="margin:6px 0; color:var(--danger);">${(e && e.message) ? e.message.replace(/</g,'&lt;') : 'Couldn\'t reach the rewrite assistant — check your connection and settings.'}</p>`;
-  }
-}
-
-function renderLineSuggestions(li, suggestions){
-  const container = document.getElementById('lineSugg-'+li);
-  if(!suggestions.length){
-    container.innerHTML = '<p class="empty-hint" style="margin:6px 0;">No suggestions came back — try again.</p>';
-    return;
-  }
-  container.innerHTML = suggestions.map(s=>{
-    const syll = s.split(/\s+/).reduce((sum,w)=>sum+countSyllables(w.replace(/[^a-zA-Z']/g,'')),0);
-    return `<div class="suggest-line-option">
-      <span class="opt-text">${s}</span>
-      <span class="opt-meta">${syll} syl</span>
-      <button class="pill" data-text="${encodeURIComponent(s)}">use</button>
-    </div>`;
-  }).join('');
-  container.querySelectorAll('button.pill').forEach(btn=>{
-    btn.addEventListener('click', ()=>applyLineRewrite(li, decodeURIComponent(btn.dataset.text)));
-  });
-}
-
-function applyLineRewrite(li, newText){
-  const lines = lyricsInput.value.split('\n');
-  const leadingWs = lines[li].match(/^\s*/)[0];
-  lines[li] = leadingWs + newText;
-  lyricsInput.value = lines.join('\n');
-  renderAnalysis();
-}
 
 
 function selectWord(el){
